@@ -1,9 +1,11 @@
 import { getProviderById, calculateTierForVolume } from '@/data/provider-pricing';
+import { calculateWaterfallAnalysis } from './waterfall-calculator';
 import type {
   CalculatorInput,
   CalculatorOutput,
   CostBreakdown,
   EnrichmentConfig,
+  WaterfallAnalysis,
 } from './types';
 
 export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput {
@@ -198,6 +200,46 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
       });
   }
 
+  // 8. Waterfall Enrichment Analysis
+  let waterfall_analysis: WaterfallAnalysis[] | undefined;
+  if (input.waterfalls && input.waterfalls.length > 0) {
+    waterfall_analysis = input.waterfalls
+      .filter((w) => w.enabled)
+      .map((waterfall_config) => {
+        // Determine contact count based on waterfall category
+        let contact_count = 0;
+        switch (waterfall_config.category) {
+          case 'email_finding':
+            contact_count = Math.ceil(contacts_with_emails);
+            break;
+          case 'phone_finding':
+            contact_count = Math.ceil(contacts_with_emails);
+            break;
+          case 'email_verification':
+            contact_count = Math.ceil(contacts_with_emails);
+            break;
+        }
+
+        const analysis = calculateWaterfallAnalysis(waterfall_config, contact_count);
+
+        // Add waterfall costs to breakdown
+        analysis.breakdown_by_step.forEach((step) => {
+          breakdown.push({
+            category: 'Waterfall Enrichment',
+            provider: step.provider_name,
+            operation: `${waterfall_config.name} - Step ${step.step_number}`,
+            unit_cost: step.cost / step.contacts_processed,
+            quantity: step.contacts_processed,
+            total: step.cost,
+            citation_url: '',
+            notes: `Found ${step.successful_finds} (${((step.successful_finds / step.contacts_processed) * 100).toFixed(1)}% coverage)`,
+          });
+        });
+
+        return analysis;
+      });
+  }
+
   const total_cost = breakdown.reduce((sum, item) => sum + item.total, 0);
   const monthly_recurring = breakdown
     .filter(
@@ -230,6 +272,7 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
     expected_qualified_replies: Math.ceil(qualified_replies),
     expected_meetings: meetings_needed,
     breakdown,
+    waterfall_analysis,
     total_cost,
     monthly_recurring,
     setup_costs: total_cost - monthly_recurring,
