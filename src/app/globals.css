@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer base {
+  :root {
+    /* Color palette - Modern blue/purple gradient theme */
+    --color-primary: 220 90% 56%;
+    --color-primary-dark: 220 85% 48%;
+    --color-secondary: 270 65% 60%;
+    --color-accent: 340 75% 55%;
+
+    /* Neutrals */
+    --color-neutral-50: 220 15% 98%;
+    --color-neutral-100: 220 13% 95%;
+    --color-neutral-200: 220 11% 88%;
+    --color-neutral-300: 220 10% 75%;
+    --color-neutral-600: 220 12% 45%;
+    --color-neutral-900: 220 18% 15%;
+
+    /* Success/Warning/Error */
+    --color-success: 142 71% 45%;
+    --color-warning: 38 92% 50%;
+    --color-error: 0 72% 51%;
+
+    /* Typography */
+    --font-body: var(--font-inter);
+    --font-display: var(--font-display);
+    --font-mono: var(--font-mono);
+
+    /* Legacy variables for compatibility */
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #0a0a0a;
+      --foreground: #ededed;
+    }
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--background);
+    color: var(--foreground);
+    @apply text-neutral-900 bg-neutral-50;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-semibold;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer utilities {
+  .text-display {
+    font-family: var(--font-display);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  .text-mono {
+    font-family: var(--font-mono);
+  }
 }
