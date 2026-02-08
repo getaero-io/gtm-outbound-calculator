@@ -29,12 +29,27 @@ export default function Home() {
   const [enrichments, setEnrichments] = useState<EnrichmentConfig[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showHeadcount, setShowHeadcount] = useState(false);
+  const [showInfrastructure, setShowInfrastructure] = useState(false);
   const [headcount, setHeadcount] = useState({
     sdr_count: 2,
     sdr_monthly_cost: 10000,
     include_headcount_in_total: false,
   });
+  const [infrastructure, setInfrastructure] = useState({
+    emails_per_inbox_per_month: 660, // 30 emails/day × 22 business days (industry standard)
+    inboxes_per_domain: 3,
+    domain_cost_yearly: 13,
+    inbox_cost_monthly: 6,
+  });
   const [results, setResults] = useState<CalculatorOutput | null>(null);
+
+  // Infrastructure presets
+  const infrastructurePresets = {
+    conservative: { emails_per_inbox_per_month: 440, inboxes_per_domain: 3, label: 'Conservative (20/day)' },
+    standard: { emails_per_inbox_per_month: 660, inboxes_per_domain: 3, label: 'Standard (30/day) - Recommended' },
+    aggressive: { emails_per_inbox_per_month: 1100, inboxes_per_domain: 2, label: 'Aggressive (50/day)' },
+    maximum: { emails_per_inbox_per_month: 1540, inboxes_per_domain: 2, label: 'Maximum (70/day)' },
+  };
 
   const contactSourcingProviders = providers.filter(p => p.category === 'contact_sourcing');
   const emailFindingProviders = providers.filter(p => p.category === 'email_finding');
@@ -59,6 +74,13 @@ export default function Home() {
         email_sending: selectedProviders.email_sending,
       },
       enrichments,
+      infrastructure: {
+        emails_per_inbox_per_month: infrastructure.emails_per_inbox_per_month,
+        emails_per_domain: infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain,
+        inboxes_per_domain: infrastructure.inboxes_per_domain,
+        domain_cost_yearly: infrastructure.domain_cost_yearly,
+        inbox_cost_monthly: infrastructure.inbox_cost_monthly,
+      },
       headcount: {
         sdr_count: headcount.sdr_count,
         sdr_monthly_cost: headcount.sdr_monthly_cost,
@@ -68,7 +90,7 @@ export default function Home() {
 
     const output = calculateCampaignCosts(input);
     setResults(output);
-  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments, headcount]);
+  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments, infrastructure, headcount]);
 
   const addEnrichment = () => {
     const newEnrichment: EnrichmentConfig = {
@@ -325,6 +347,171 @@ export default function Home() {
                       <li>• Outbound SDR (solid): 12-15 qualified meetings/month</li>
                       <li>• Outbound SDR (top): 18-20 qualified meetings/month</li>
                       <li>• Cost per meeting (outsourced): $150-$500</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Infrastructure Configuration */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+              <button
+                onClick={() => setShowInfrastructure(!showInfrastructure)}
+                className="w-full flex justify-between items-center text-left"
+              >
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Email Infrastructure Settings
+                </h2>
+                <span className="text-slate-500">
+                  {showInfrastructure ? '▼' : '▶'}
+                </span>
+              </button>
+              {showInfrastructure && (
+                <div className="mt-6 space-y-6">
+                  {/* Preset Selector */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Infrastructure Preset
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(infrastructurePresets).map(([key, preset]) => (
+                        <button
+                          key={key}
+                          onClick={() => setInfrastructure({
+                            ...infrastructure,
+                            emails_per_inbox_per_month: preset.emails_per_inbox_per_month,
+                            inboxes_per_domain: preset.inboxes_per_domain
+                          })}
+                          className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                            infrastructure.emails_per_inbox_per_month === preset.emails_per_inbox_per_month &&
+                            infrastructure.inboxes_per_domain === preset.inboxes_per_domain
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Configuration */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Emails per Inbox per Month
+                      </label>
+                      <input
+                        type="number"
+                        min="100"
+                        max="2000"
+                        step="10"
+                        value={infrastructure.emails_per_inbox_per_month}
+                        onChange={(e) => setInfrastructure({ ...infrastructure, emails_per_inbox_per_month: Number(e.target.value) })}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        ~{Math.round(infrastructure.emails_per_inbox_per_month / 22)} emails/day
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Inboxes per Domain
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={infrastructure.inboxes_per_domain}
+                        onChange={(e) => setInfrastructure({ ...infrastructure, inboxes_per_domain: Number(e.target.value) })}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Recommended: 2-3 inboxes
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Cost Configuration */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Domain Cost ($/year)
+                      </label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="50"
+                        step="0.5"
+                        value={infrastructure.domain_cost_yearly}
+                        onChange={(e) => setInfrastructure({ ...infrastructure, domain_cost_yearly: Number(e.target.value) })}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Namecheap: $13, Porkbun: $10
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Inbox Cost ($/month)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        step="0.5"
+                        value={infrastructure.inbox_cost_monthly}
+                        onChange={(e) => setInfrastructure({ ...infrastructure, inbox_cost_monthly: Number(e.target.value) })}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Google: $6, Zoho: $1, Microsoft: $6
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Infrastructure Summary & Warnings */}
+                  <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                      Configuration Summary
+                    </h3>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                      <div className="flex justify-between">
+                        <span>Emails per domain per month:</span>
+                        <span className="font-medium">{(infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Daily send limit per inbox:</span>
+                        <span className="font-medium">~{Math.round(infrastructure.emails_per_inbox_per_month / 22)}/day</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Daily send limit per domain:</span>
+                        <span className="font-medium">~{Math.round((infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain) / 22)}/day</span>
+                      </div>
+                    </div>
+                    {Math.round(infrastructure.emails_per_inbox_per_month / 22) > 50 && (
+                      <div className="mt-3 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded text-xs text-orange-700 dark:text-orange-300">
+                        ⚠️ Warning: Sending {Math.round(infrastructure.emails_per_inbox_per_month / 22)}+/day per inbox may trigger spam filters. Recommended max: 50/day.
+                      </div>
+                    )}
+                    {Math.round((infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain) / 22) > 140 && (
+                      <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded text-xs text-orange-700 dark:text-orange-300">
+                        ⚠️ Warning: Domain load {Math.round((infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain) / 22)}+/day. Recommended max: 140/day per domain.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Best Practices */}
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                    <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
+                      2026 Industry Best Practices
+                    </h3>
+                    <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                      <li>• New domains: Start 10-20 emails/day, warmup 2-4 weeks</li>
+                      <li>• Warmed domains: 30-50 emails/day per inbox (safe)</li>
+                      <li>• Inbox-to-domain ratio: 2-3 inboxes per domain (optimal)</li>
+                      <li>• Domain limit: Max 140 emails/day to avoid spam filters</li>
+                      <li>• Warmup: 20-30 warmup emails/day with 30-45% response rate</li>
                     </ul>
                   </div>
                 </div>

@@ -16,12 +16,14 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
     headcount,
   } = input;
 
-  // Default infrastructure params
-  const emails_per_domain = infrastructure?.emails_per_domain ?? 500;
-  const emails_per_inbox = infrastructure?.emails_per_inbox_per_month ?? 200;
+  // Default infrastructure params (2026 industry benchmarks)
+  // Conservative: 30 emails/day × 22 business days = 660/month per inbox
+  // Aggressive: 50 emails/day × 22 business days = 1,100/month per inbox
+  const emails_per_inbox = infrastructure?.emails_per_inbox_per_month ?? 660;
+  const inboxes_per_domain = infrastructure?.inboxes_per_domain ?? 3;
+  const emails_per_domain = infrastructure?.emails_per_domain ?? (emails_per_inbox * inboxes_per_domain); // 1,980/month
   const domain_cost_yearly = infrastructure?.domain_cost_yearly ?? 13;
   const inbox_cost_monthly = infrastructure?.inbox_cost_monthly ?? 6;
-  const inboxes_per_domain = infrastructure?.inboxes_per_domain ?? 3;
 
   // Reverse calculate funnel
   const qualified_replies = meetings_needed / conversion_rates.meeting_set_rate;
