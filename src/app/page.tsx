@@ -28,6 +28,12 @@ export default function Home() {
   });
   const [enrichments, setEnrichments] = useState<EnrichmentConfig[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showHeadcount, setShowHeadcount] = useState(false);
+  const [headcount, setHeadcount] = useState({
+    sdr_count: 2,
+    sdr_monthly_cost: 10000,
+    include_headcount_in_total: false,
+  });
   const [results, setResults] = useState<CalculatorOutput | null>(null);
 
   const contactSourcingProviders = providers.filter(p => p.category === 'contact_sourcing');
@@ -53,11 +59,16 @@ export default function Home() {
         email_sending: selectedProviders.email_sending,
       },
       enrichments,
+      headcount: {
+        sdr_count: headcount.sdr_count,
+        sdr_monthly_cost: headcount.sdr_monthly_cost,
+        include_headcount_in_total: headcount.include_headcount_in_total,
+      },
     };
 
     const output = calculateCampaignCosts(input);
     setResults(output);
-  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments]);
+  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments, headcount]);
 
   const addEnrichment = () => {
     const newEnrichment: EnrichmentConfig = {
@@ -220,8 +231,16 @@ export default function Home() {
                       <div className="space-y-2">
                         <div>
                           <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
-                            Cost per unit: ${enrichment.cost_per_unit.toFixed(4)}
+                            Cost per unit ($)
                           </label>
+                          <input
+                            type="number"
+                            step="0.0001"
+                            min="0"
+                            value={enrichment.cost_per_unit}
+                            onChange={(e) => updateEnrichment(enrichment.id, { cost_per_unit: Number(e.target.value) })}
+                            className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                          />
                         </div>
                         <div>
                           <label className="block text-xs text-slate-600 dark:text-slate-400 mb-1">
@@ -239,6 +258,75 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Headcount Costs */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+              <button
+                onClick={() => setShowHeadcount(!showHeadcount)}
+                className="w-full flex justify-between items-center text-left"
+              >
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Headcount & SDR Costs
+                </h2>
+                <span className="text-slate-500">
+                  {showHeadcount ? '▼' : '▶'}
+                </span>
+              </button>
+              {showHeadcount && (
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Number of SDRs
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={headcount.sdr_count}
+                      onChange={(e) => setHeadcount({ ...headcount, sdr_count: Number(e.target.value) })}
+                      className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Cost per SDR per Month ($)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={headcount.sdr_monthly_cost}
+                      onChange={(e) => setHeadcount({ ...headcount, sdr_monthly_cost: Number(e.target.value) })}
+                      className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Industry benchmark: $7,500-$13,000/month per SDR (for 2 reps)
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="include-headcount"
+                      checked={headcount.include_headcount_in_total}
+                      onChange={(e) => setHeadcount({ ...headcount, include_headcount_in_total: e.target.checked })}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <label htmlFor="include-headcount" className="ml-2 text-sm text-slate-700 dark:text-slate-300">
+                      Include headcount in total cost
+                    </label>
+                  </div>
+                  <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                      Industry Benchmarks
+                    </h3>
+                    <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                      <li>• Outbound SDR (solid): 12-15 qualified meetings/month</li>
+                      <li>• Outbound SDR (top): 18-20 qualified meetings/month</li>
+                      <li>• Cost per meeting (outsourced): $150-$500</li>
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
@@ -279,6 +367,9 @@ export default function Home() {
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         {rate.description}
+                      </p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
+                        Source: {rate.source}
                       </p>
                     </div>
                   ))}
@@ -338,7 +429,7 @@ export default function Home() {
                 <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
                   <h2 className="text-2xl font-semibold mb-4">Total Campaign Cost</h2>
                   <div className="text-5xl font-bold mb-6">
-                    ${results.total_cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${(results.total_cost_with_headcount ?? results.total_cost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -354,12 +445,51 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+                  {results.headcount_cost && (
+                    <div className="mt-4 pt-4 border-t border-blue-500">
+                      <div className="text-blue-200">SDR Headcount Cost</div>
+                      <div className="text-xl font-semibold">
+                        ${results.headcount_cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-4 pt-4 border-t border-blue-500">
                     <div className="text-blue-200">Cost Per Meeting</div>
                     <div className="text-3xl font-bold">
-                      ${results.cost_per_meeting.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${(results.cost_per_meeting_with_headcount ?? results.cost_per_meeting).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    {results.cost_per_meeting_with_headcount && (
+                      <div className="text-xs text-blue-200 mt-1">
+                        Tools only: ${results.cost_per_meeting.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Industry Benchmarks */}
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
+                    Industry Benchmarks
+                  </h2>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Your cost per meeting</span>
+                      <span className="text-lg font-semibold text-slate-900 dark:text-white">
+                        ${(results.cost_per_meeting_with_headcount ?? results.cost_per_meeting).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Outsourced (low)</span>
+                      <span className="text-lg font-semibold text-green-600 dark:text-green-400">$150</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Outsourced (high)</span>
+                      <span className="text-lg font-semibold text-orange-600 dark:text-orange-400">$500</span>
                     </div>
                   </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
+                    Source: Industry benchmark 2026
+                  </p>
                 </div>
 
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">

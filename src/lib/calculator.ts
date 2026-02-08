@@ -7,14 +7,21 @@ import type {
 } from './types';
 
 export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput {
-  const { meetings_needed, conversion_rates, selected_providers, enrichments, infrastructure } =
-    input;
+  const {
+    meetings_needed,
+    conversion_rates,
+    selected_providers,
+    enrichments,
+    infrastructure,
+    headcount,
+  } = input;
 
   // Default infrastructure params
   const emails_per_domain = infrastructure?.emails_per_domain ?? 500;
   const emails_per_inbox = infrastructure?.emails_per_inbox_per_month ?? 200;
   const domain_cost_yearly = infrastructure?.domain_cost_yearly ?? 13;
   const inbox_cost_monthly = infrastructure?.inbox_cost_monthly ?? 6;
+  const inboxes_per_domain = infrastructure?.inboxes_per_domain ?? 3;
 
   // Reverse calculate funnel
   const qualified_replies = meetings_needed / conversion_rates.meeting_set_rate;
@@ -134,26 +141,20 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
     notes: `${domains_needed} domains @ $${(domain_cost_yearly / 12).toFixed(2)}/mo each`,
   });
 
-  // 6. Inbox Costs (if needed - check if sending platform includes it)
-  const sendingIncludesInboxes = sendingProvider?.notes.some((n) =>
-    n.toLowerCase().includes('unlimited'),
-  );
+  // 6. Inbox Costs - using 3 inboxes per domain
+  const inboxes_needed = domains_needed * inboxes_per_domain;
+  const inbox_total = inboxes_needed * inbox_cost_monthly;
 
-  if (!sendingIncludesInboxes || selected_providers.email_sending === 'smartlead') {
-    const inboxes_needed = Math.ceil(emails_delivered / emails_per_inbox);
-    const inbox_total = inboxes_needed * inbox_cost_monthly;
-
-    breakdown.push({
-      category: 'Infrastructure',
-      provider: 'Email Inboxes',
-      operation: 'Inbox Setup',
-      unit_cost: inbox_cost_monthly,
-      quantity: inboxes_needed,
-      total: inbox_total,
-      citation_url: 'https://workspace.google.com/pricing',
-      notes: `${inboxes_needed} inboxes @ $${inbox_cost_monthly}/mo each`,
-    });
-  }
+  breakdown.push({
+    category: 'Infrastructure',
+    provider: 'Email Inboxes',
+    operation: 'Monthly Inboxes',
+    unit_cost: inbox_cost_monthly,
+    quantity: inboxes_needed,
+    total: inbox_total,
+    citation_url: 'https://workspace.google.com/pricing',
+    notes: `${inboxes_needed} inboxes (${domains_needed} domains × ${inboxes_per_domain} inboxes/domain) @ $${inbox_cost_monthly}/mo each`,
+  });
 
   // 7. Additional Enrichments
   if (enrichments && enrichments.length > 0) {
@@ -200,9 +201,24 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
     .filter(
       (b) =>
         b.category === 'Email Sending Platform' ||
-        (b.category === 'Infrastructure' && b.operation !== 'Domains'),
+        (b.category === 'Infrastructure' && b.operation === 'Monthly Inboxes') ||
+        (b.category === 'Infrastructure' && b.operation === 'Domains'),
     )
     .reduce((sum, item) => sum + item.total, 0);
+
+  // Calculate headcount costs if provided
+  const headcount_cost =
+    headcount?.sdr_count && headcount?.sdr_monthly_cost
+      ? headcount.sdr_count * headcount.sdr_monthly_cost
+      : 0;
+
+  const total_cost_with_headcount =
+    headcount?.include_headcount_in_total ? total_cost + headcount_cost : total_cost;
+
+  const cost_per_meeting_with_headcount =
+    headcount?.include_headcount_in_total && headcount_cost > 0
+      ? total_cost_with_headcount / meetings_needed
+      : total_cost / meetings_needed;
 
   return {
     leads_to_source: Math.ceil(leads_to_source),
@@ -216,5 +232,10 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
     monthly_recurring,
     setup_costs: total_cost - monthly_recurring,
     cost_per_meeting: total_cost / meetings_needed,
+    headcount_cost: headcount_cost > 0 ? headcount_cost : undefined,
+    total_cost_with_headcount:
+      headcount_cost > 0 ? total_cost_with_headcount : undefined,
+    cost_per_meeting_with_headcount:
+      headcount_cost > 0 ? cost_per_meeting_with_headcount : undefined,
   };
 }

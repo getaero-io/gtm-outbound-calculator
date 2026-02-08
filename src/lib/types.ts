@@ -30,6 +30,7 @@ export interface Provider {
     phone_find?: number;
     contact_export?: number;
     contact_search?: number;
+    company_search?: number;
     email_send_1k?: number;
     inbox_monthly?: number;
     domain_yearly?: number;
@@ -88,6 +89,12 @@ export interface CalculatorInput {
     emails_per_inbox_per_month?: number;
     domain_cost_yearly?: number;
     inbox_cost_monthly?: number;
+    inboxes_per_domain?: number;
+  };
+  headcount?: {
+    sdr_count?: number;
+    sdr_monthly_cost?: number;
+    include_headcount_in_total?: boolean;
   };
 }
 
@@ -114,4 +121,7 @@ export interface CalculatorOutput {
   monthly_recurring: number;
   setup_costs: number;
   cost_per_meeting: number;
+  headcount_cost?: number;
+  total_cost_with_headcount?: number;
+  cost_per_meeting_with_headcount?: number;
 }
