@@ -1,0 +1,117 @@
+export type ProviderCategory =
+  | 'contact_sourcing'
+  | 'email_finding'
+  | 'email_verification'
+  | 'phone_finding'
+  | 'email_sending'
+  | 'infrastructure';
+
+export interface PricingTier {
+  name: string;
+  monthly_cost: number;
+  credits?: number;
+  emails?: number;
+  contacts?: number;
+  features: string[];
+  is_lowest_tier: boolean;
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  category: ProviderCategory;
+  logo_url?: string;
+  website_url: string;
+  pricing_url: string;
+  tiers: PricingTier[];
+  cost_per_unit: {
+    email_find?: number;
+    email_verify?: number;
+    phone_find?: number;
+    contact_export?: number;
+    contact_search?: number;
+    email_send_1k?: number;
+    inbox_monthly?: number;
+    domain_yearly?: number;
+  };
+  notes: string[];
+  last_updated: string;
+  integration_credits?: {
+    operation: string;
+    credits: number;
+    notes?: string;
+  }[];
+}
+
+export interface ConversionRate {
+  id: string;
+  name: string;
+  rate: number;
+  min: number;
+  max: number;
+  source: string;
+  adjustable: boolean;
+  description: string;
+}
+
+export interface EnrichmentConfig {
+  id: string;
+  name: string;
+  provider_id: string;
+  operation: string;
+  cost_per_unit: number;
+  unit_type: 'contact' | 'email' | 'phone' | 'company';
+  apply_to_percentage: number; // 0-100, default 100
+  enabled: boolean;
+}
+
+export interface CalculatorInput {
+  meetings_needed: number;
+  conversion_rates: {
+    meeting_set_rate: number;
+    qualified_reply_rate: number;
+    reply_rate: number;
+    deliverability_rate: number;
+    email_find_rate: number;
+    post_enrichment_valid_rate: number;
+  };
+  selected_providers: {
+    contact_sourcing?: string;
+    email_finding: string;
+    email_verification?: string;
+    email_sending: string;
+    phone_finding?: string;
+  };
+  enrichments?: EnrichmentConfig[];
+  infrastructure?: {
+    emails_per_domain?: number;
+    emails_per_inbox_per_month?: number;
+    domain_cost_yearly?: number;
+    inbox_cost_monthly?: number;
+  };
+}
+
+export interface CostBreakdown {
+  category: string;
+  provider: string;
+  operation?: string;
+  unit_cost: number;
+  quantity: number;
+  total: number;
+  citation_url: string;
+  notes?: string;
+}
+
+export interface CalculatorOutput {
+  leads_to_source: number;
+  valid_emails_needed: number;
+  emails_to_send: number;
+  expected_replies: number;
+  expected_qualified_replies: number;
+  expected_meetings: number;
+  breakdown: CostBreakdown[];
+  total_cost: number;
+  monthly_recurring: number;
+  setup_costs: number;
+  cost_per_meeting: number;
+}
