@@ -1,4 +1,4 @@
-import { Provider } from '@/lib/types';
+import { Provider, PricingTier } from '@/lib/types';
 
 export const providers: Provider[] = [
   // CONTACT SOURCING

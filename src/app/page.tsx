@@ -8,7 +8,12 @@ import type { CalculatorInput, CalculatorOutput, EnrichmentConfig } from '@/lib/
 
 export default function Home() {
   const [meetingsNeeded, setMeetingsNeeded] = useState(10);
-  const [selectedProviders, setSelectedProviders] = useState({
+  const [selectedProviders, setSelectedProviders] = useState<{
+    contact_sourcing: string;
+    email_finding: string;
+    email_verification?: string;
+    email_sending: string;
+  }>({
     contact_sourcing: 'apollo',
     email_finding: 'leadmagic',
     email_verification: 'leadmagic',
