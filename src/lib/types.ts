@@ -66,6 +66,35 @@ export interface EnrichmentConfig {
   enabled: boolean;
 }
 
+export interface WaterfallStep {
+  id: string;
+  provider_id: string;
+  order: number; // 1-based order in waterfall sequence
+  expected_coverage_rate: number; // % of remaining contacts this step will find
+}
+
+export interface WaterfallConfig {
+  id: string;
+  name: string;
+  category: 'email_finding' | 'phone_finding' | 'email_verification';
+  enabled: boolean;
+  steps: WaterfallStep[];
+}
+
+export interface WaterfallAnalysis {
+  config: WaterfallConfig;
+  total_coverage_rate: number; // Combined coverage from all steps
+  total_cost: number;
+  cost_per_successful_find: number;
+  breakdown_by_step: {
+    step_number: number;
+    provider_name: string;
+    contacts_processed: number;
+    successful_finds: number;
+    cost: number;
+  }[];
+}
+
 export interface CalculatorInput {
   meetings_needed: number;
   conversion_rates: {
@@ -84,6 +113,7 @@ export interface CalculatorInput {
     phone_finding?: string;
   };
   enrichments?: EnrichmentConfig[];
+  waterfalls?: WaterfallConfig[]; // Waterfall enrichment configs
   infrastructure?: {
     emails_per_domain?: number;
     emails_per_inbox_per_month?: number;
@@ -117,6 +147,7 @@ export interface CalculatorOutput {
   expected_qualified_replies: number;
   expected_meetings: number;
   breakdown: CostBreakdown[];
+  waterfall_analysis?: WaterfallAnalysis[]; // Waterfall cost/coverage analysis
   total_cost: number;
   monthly_recurring: number;
   setup_costs: number;
