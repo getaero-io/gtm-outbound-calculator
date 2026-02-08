@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { calculateCampaignCosts } from '@/lib/calculator';
 import { providers } from '@/data/provider-pricing';
 import { conversionRates as defaultConversionRates } from '@/data/conversion-rates';
-import type { CalculatorInput, CalculatorOutput, EnrichmentConfig } from '@/lib/types';
+import type { CalculatorInput, CalculatorOutput, EnrichmentConfig, WaterfallConfig } from '@/lib/types';
+import { InputSection } from '@/components/calculator/InputSection';
+import { WaterfallBuilder } from '@/components/calculator/WaterfallBuilder';
+import { WaterfallVisualization } from '@/components/calculator/WaterfallVisualization';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 
 export default function Home() {
   const [meetingsNeeded, setMeetingsNeeded] = useState(10);
@@ -42,6 +46,7 @@ export default function Home() {
     inbox_cost_monthly: 6,
   });
   const [results, setResults] = useState<CalculatorOutput | null>(null);
+  const [waterfalls, setWaterfalls] = useState<WaterfallConfig[]>([]);
 
   // Infrastructure presets
   const infrastructurePresets = {
@@ -74,6 +79,7 @@ export default function Home() {
         email_sending: selectedProviders.email_sending,
       },
       enrichments,
+      waterfalls,
       infrastructure: {
         emails_per_inbox_per_month: infrastructure.emails_per_inbox_per_month,
         emails_per_domain: infrastructure.emails_per_inbox_per_month * infrastructure.inboxes_per_domain,
@@ -90,7 +96,7 @@ export default function Home() {
 
     const output = calculateCampaignCosts(input);
     setResults(output);
-  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments, infrastructure, headcount]);
+  }, [meetingsNeeded, selectedProviders, conversionRates, enrichments, waterfalls, infrastructure, headcount]);
 
   const addEnrichment = () => {
     const newEnrichment: EnrichmentConfig = {
@@ -518,6 +524,11 @@ export default function Home() {
               )}
             </div>
 
+            {/* Waterfall Enrichment Section */}
+            <CollapsibleSection title="Waterfall Enrichment" badge="NEW">
+              <WaterfallBuilder waterfalls={waterfalls} onChange={setWaterfalls} />
+            </CollapsibleSection>
+
             {/* Advanced Settings */}
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
               <button
@@ -678,6 +689,13 @@ export default function Home() {
                     Source: Industry benchmark 2026
                   </p>
                 </div>
+
+                {/* Waterfall Analysis Results */}
+                {results?.waterfall_analysis && results.waterfall_analysis.length > 0 && (
+                  <CollapsibleSection title="Waterfall Analysis" defaultOpen>
+                    <WaterfallVisualization analysis={results.waterfall_analysis} />
+                  </CollapsibleSection>
+                )}
 
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
