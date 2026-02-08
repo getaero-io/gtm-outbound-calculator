@@ -240,6 +240,26 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
       });
   }
 
+  // Calculate headcount costs first (before total_cost calculation)
+  const headcount_cost =
+    headcount?.sdr_count && headcount?.sdr_monthly_cost
+      ? headcount.sdr_count * headcount.sdr_monthly_cost
+      : 0;
+
+  // Add headcount to breakdown if included in total
+  if (headcount_cost > 0 && headcount?.include_headcount_in_total && headcount.sdr_count && headcount.sdr_monthly_cost) {
+    breakdown.push({
+      category: 'SDR Headcount',
+      provider: 'In-house Team',
+      operation: `${headcount.sdr_count} SDR${headcount.sdr_count > 1 ? 's' : ''}`,
+      unit_cost: headcount.sdr_monthly_cost,
+      quantity: headcount.sdr_count,
+      total: headcount_cost,
+      citation_url: '',
+      notes: `$${headcount.sdr_monthly_cost.toLocaleString()}/month per SDR`,
+    });
+  }
+
   const total_cost = breakdown.reduce((sum, item) => sum + item.total, 0);
   const monthly_recurring = breakdown
     .filter(
@@ -249,12 +269,6 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
         (b.category === 'Infrastructure' && b.operation === 'Domains'),
     )
     .reduce((sum, item) => sum + item.total, 0);
-
-  // Calculate headcount costs if provided
-  const headcount_cost =
-    headcount?.sdr_count && headcount?.sdr_monthly_cost
-      ? headcount.sdr_count * headcount.sdr_monthly_cost
-      : 0;
 
   const total_cost_with_headcount =
     headcount?.include_headcount_in_total ? total_cost + headcount_cost : total_cost;

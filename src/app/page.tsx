@@ -37,7 +37,7 @@ export default function Home() {
   const [headcount, setHeadcount] = useState({
     sdr_count: 2,
     sdr_monthly_cost: 10000,
-    include_headcount_in_total: false,
+    include_headcount_in_total: true,
   });
   const [infrastructure, setInfrastructure] = useState({
     emails_per_inbox_per_month: 660, // 30 emails/day × 22 business days (industry standard)
