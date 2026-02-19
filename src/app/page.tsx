@@ -32,10 +32,9 @@ export default function Home() {
   });
   const [enrichments, setEnrichments] = useState<EnrichmentConfig[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showHeadcount, setShowHeadcount] = useState(false);
   const [showInfrastructure, setShowInfrastructure] = useState(false);
   const [headcount, setHeadcount] = useState({
-    sdr_count: 2,
+    sdr_count: 1,
     sdr_monthly_cost: 10000,
     include_headcount_in_total: true,
   });
@@ -135,6 +134,55 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Panel */}
           <div className="space-y-6">
+            {/* SDR Team Size - Moved to Top */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
+                Team Size
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Number of SDRs
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={headcount.sdr_count}
+                    onChange={(e) => setHeadcount({ ...headcount, sdr_count: Number(e.target.value) })}
+                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Cost per SDR per Month ($)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={headcount.sdr_monthly_cost}
+                    onChange={(e) => setHeadcount({ ...headcount, sdr_monthly_cost: Number(e.target.value) })}
+                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Benchmark: $7,500-$13,000/month per SDR
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="include-headcount"
+                    checked={headcount.include_headcount_in_total}
+                    onChange={(e) => setHeadcount({ ...headcount, include_headcount_in_total: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <label htmlFor="include-headcount" className="ml-2 text-sm text-slate-700 dark:text-slate-300">
+                    Include headcount in total cost
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
                 Campaign Goal
@@ -286,75 +334,6 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-
-            {/* Headcount Costs */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
-              <button
-                onClick={() => setShowHeadcount(!showHeadcount)}
-                className="w-full flex justify-between items-center text-left"
-              >
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  Headcount & SDR Costs
-                </h2>
-                <span className="text-slate-500">
-                  {showHeadcount ? '▼' : '▶'}
-                </span>
-              </button>
-              {showHeadcount && (
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Number of SDRs
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={headcount.sdr_count}
-                      onChange={(e) => setHeadcount({ ...headcount, sdr_count: Number(e.target.value) })}
-                      className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Cost per SDR per Month ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="100"
-                      value={headcount.sdr_monthly_cost}
-                      onChange={(e) => setHeadcount({ ...headcount, sdr_monthly_cost: Number(e.target.value) })}
-                      className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Industry benchmark: $7,500-$13,000/month per SDR (for 2 reps)
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="include-headcount"
-                      checked={headcount.include_headcount_in_total}
-                      onChange={(e) => setHeadcount({ ...headcount, include_headcount_in_total: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <label htmlFor="include-headcount" className="ml-2 text-sm text-slate-700 dark:text-slate-300">
-                      Include headcount in total cost
-                    </label>
-                  </div>
-                  <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                      Industry Benchmarks
-                    </h3>
-                    <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
-                      <li>• Outbound SDR (solid): 12-15 qualified meetings/month</li>
-                      <li>• Outbound SDR (top): 18-20 qualified meetings/month</li>
-                      <li>• Cost per meeting (outsourced): $150-$500</li>
-                    </ul>
-                  </div>
                 </div>
               )}
             </div>
@@ -529,28 +508,38 @@ export default function Home() {
               <WaterfallBuilder waterfalls={waterfalls} onChange={setWaterfalls} />
             </CollapsibleSection>
 
-            {/* Advanced Settings */}
+            {/* Conversion Rate Assumptions - Redesigned */}
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
               <button
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="w-full flex justify-between items-center text-left"
               >
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  Conversion Rate Assumptions
-                </h2>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                    Benchmark Assumptions
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Industry-standard conversion rates from 2025-2026 research
+                  </p>
+                </div>
                 <span className="text-slate-500">
                   {showAdvanced ? '▼' : '▶'}
                 </span>
               </button>
               {showAdvanced && (
-                <div className="mt-6 space-y-4">
-                  {defaultConversionRates.map((rate) => (
-                    <div key={rate.id}>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                          {rate.name}
-                        </label>
-                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                <div className="mt-6 space-y-6">
+                  {defaultConversionRates.map((rate, index) => (
+                    <div key={rate.id} className="border-l-2 border-blue-500 dark:border-blue-400 pl-4 pb-4 border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold text-slate-900 dark:text-white block mb-1">
+                            {rate.name}
+                          </label>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {rate.description}
+                          </p>
+                        </div>
+                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400 ml-4 tabular-nums">
                           {(conversionRates[rate.id] * 100).toFixed(1)}%
                         </span>
                       </div>
@@ -561,25 +550,28 @@ export default function Home() {
                         step="0.01"
                         value={conversionRates[rate.id]}
                         onChange={(e) => setConversionRates({ ...conversionRates, [rate.id]: Number(e.target.value) })}
-                        className="w-full"
+                        className="w-full mb-3"
                       />
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {rate.description}
-                      </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
-                        Source: {rate.source_url ? (
+                      <div className="flex items-start gap-2 mt-2 p-2 bg-slate-50 dark:bg-slate-700/50 rounded">
+                        <svg className="w-3 h-3 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+                          <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
+                        </svg>
+                        {rate.source_url ? (
                           <a
                             href={rate.source_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                            className="text-xs text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors leading-tight"
                           >
-                            {rate.source} →
+                            {rate.source}
                           </a>
                         ) : (
-                          rate.source
+                          <span className="text-xs text-slate-600 dark:text-slate-400 leading-tight">
+                            {rate.source}
+                          </span>
                         )}
-                      </p>
+                      </div>
                     </div>
                   ))}
                 </div>
