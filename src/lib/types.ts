@@ -51,6 +51,7 @@ export interface ConversionRate {
   min: number;
   max: number;
   source: string;
+  source_url?: string;
   adjustable: boolean;
   description: string;
 }

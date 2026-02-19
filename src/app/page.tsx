@@ -567,7 +567,18 @@ export default function Home() {
                         {rate.description}
                       </p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
-                        Source: {rate.source}
+                        Source: {rate.source_url ? (
+                          <a
+                            href={rate.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {rate.source} →
+                          </a>
+                        ) : (
+                          rate.source
+                        )}
                       </p>
                     </div>
                   ))}
