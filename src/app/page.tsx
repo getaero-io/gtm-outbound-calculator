@@ -392,7 +392,7 @@ export default function Home() {
                             infrastructure.emails_per_inbox_per_month === preset.emails_per_inbox_per_month &&
                             infrastructure.inboxes_per_domain === preset.inboxes_per_domain
                               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                              : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 text-slate-900 dark:text-white'
                           }`}
                         >
                           {preset.label}
