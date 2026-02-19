@@ -11,19 +11,19 @@ export const waterfallPresets: Record<string, WaterfallConfig> = {
         id: 'step-1',
         provider_id: 'apollo',
         order: 1,
-        expected_coverage_rate: 0.65, // 65% coverage
+        expected_coverage_rate: 0.50, // 50% coverage (realistic for B2B)
       },
       {
         id: 'step-2',
         provider_id: 'hunter',
         order: 2,
-        expected_coverage_rate: 0.50, // 50% of remaining
+        expected_coverage_rate: 0.40, // 40% of remaining
       },
       {
         id: 'step-3',
         provider_id: 'prospeo',
         order: 3,
-        expected_coverage_rate: 0.40, // 40% of remaining
+        expected_coverage_rate: 0.30, // 30% of remaining
       },
     ],
   },
@@ -37,13 +37,13 @@ export const waterfallPresets: Record<string, WaterfallConfig> = {
         id: 'step-1',
         provider_id: 'apollo',
         order: 1,
-        expected_coverage_rate: 0.65,
+        expected_coverage_rate: 0.50,
       },
       {
         id: 'step-2',
         provider_id: 'findymail',
         order: 2,
-        expected_coverage_rate: 0.45,
+        expected_coverage_rate: 0.35,
       },
     ],
   },
@@ -57,13 +57,13 @@ export const waterfallPresets: Record<string, WaterfallConfig> = {
         id: 'step-1',
         provider_id: 'bettercontact',
         order: 1,
-        expected_coverage_rate: 0.70, // BetterContact has built-in waterfall
+        expected_coverage_rate: 0.30, // 30% realistic phone coverage
       },
       {
         id: 'step-2',
         provider_id: 'lusha',
         order: 2,
-        expected_coverage_rate: 0.40,
+        expected_coverage_rate: 0.25, // 25% of remaining
       },
     ],
   },
