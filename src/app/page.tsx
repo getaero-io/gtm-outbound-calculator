@@ -665,6 +665,32 @@ export default function Home() {
                       </div>
                     </div>
                   )}
+
+                  {/* Domain & Infrastructure Metrics */}
+                  <div className="mt-4 pt-4 border-t border-blue-500">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-blue-200 text-sm">Domains Required</div>
+                        <div className="text-2xl font-bold">{results.domains_needed}</div>
+                        <div className="text-xs text-blue-200 mt-1">
+                          {results.inboxes_needed} total inboxes
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-blue-200 text-sm">Daily Send Rate</div>
+                        <div className="text-2xl font-bold">{results.emails_per_domain_per_day}/day</div>
+                        <div className="text-xs text-blue-200 mt-1">
+                          per domain
+                        </div>
+                      </div>
+                    </div>
+                    {results.rotation_days && (
+                      <div className="mt-3 p-2 bg-blue-600 rounded text-xs text-blue-100">
+                        ⚠️ Rotation recommended every {results.rotation_days} days to stay under 140/day limit
+                      </div>
+                    )}
+                  </div>
+
                   <div className="mt-4 pt-4 border-t border-blue-500">
                     <div className="text-blue-200">Cost Per Meeting</div>
                     <div className="text-3xl font-bold">

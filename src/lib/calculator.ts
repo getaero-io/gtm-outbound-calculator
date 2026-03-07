@@ -278,6 +278,15 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
       ? total_cost_with_headcount / meetings_needed
       : total_cost / meetings_needed;
 
+  // Calculate infrastructure metrics
+  const emails_per_domain_per_day = Math.ceil(emails_per_domain / 22); // 22 business days
+
+  // Calculate rotation days (optional - if sending more than recommended)
+  // If sending >140/day per domain, calculate when rotation is needed
+  const rotation_days = emails_per_domain_per_day > 140
+    ? Math.ceil((140 * 22) / (emails_delivered / domains_needed))
+    : undefined;
+
   return {
     leads_to_source: Math.ceil(leads_to_source),
     valid_emails_needed: Math.ceil(valid_emails_needed),
@@ -296,5 +305,10 @@ export function calculateCampaignCosts(input: CalculatorInput): CalculatorOutput
       headcount_cost > 0 ? total_cost_with_headcount : undefined,
     cost_per_meeting_with_headcount:
       headcount_cost > 0 ? cost_per_meeting_with_headcount : undefined,
+    // Infrastructure metrics
+    domains_needed,
+    inboxes_needed,
+    emails_per_domain_per_day,
+    rotation_days,
   };
 }

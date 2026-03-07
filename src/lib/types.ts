@@ -156,4 +156,9 @@ export interface CalculatorOutput {
   headcount_cost?: number;
   total_cost_with_headcount?: number;
   cost_per_meeting_with_headcount?: number;
+  // Infrastructure metrics
+  domains_needed: number;
+  inboxes_needed: number;
+  emails_per_domain_per_day: number;
+  rotation_days?: number; // Days until domain rotation recommended
 }
