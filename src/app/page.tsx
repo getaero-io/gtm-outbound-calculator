@@ -34,7 +34,7 @@ export default function Home() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showInfrastructure, setShowInfrastructure] = useState(false);
   const [headcount, setHeadcount] = useState({
-    sdr_count: 1,
+    sdr_count: 0,
     sdr_monthly_cost: 10000,
     include_headcount_in_total: true,
   });
